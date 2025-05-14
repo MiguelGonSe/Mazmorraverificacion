@@ -27,8 +27,10 @@ import javafx.scene.layout.StackPane;
 /**
  * Controlador principal del juego.
  * <p>
- * Se encarga de inicializar la escena, gestionar los turnos entre el jugador y los enemigos,
- * actualizar la interfaz gráfica (stats, imágenes y etiquetas) y controlar el estado general
+ * Se encarga de inicializar la escena, gestionar los turnos entre el jugador y
+ * los enemigos,
+ * actualizar la interfaz gráfica (stats, imágenes y etiquetas) y controlar el
+ * estado general
  * de la partida (victoria, derrota).
  * </p>
  * 
@@ -38,7 +40,8 @@ import javafx.scene.layout.StackPane;
  * </p>
  * 
  * <p>
- * Este controlador gestiona las acciones del usuario mediante eventos de teclado y 
+ * Este controlador gestiona las acciones del usuario mediante eventos de
+ * teclado y
  * coordina la lógica de combate por turnos.
  * </p>
  * 
@@ -125,13 +128,14 @@ public class JuegoController implements Observer {
     private List<Personaje> personajesPorTurno;
     private boolean juegoTerminado = false;
 
-
     /**
      * Inicializa la escena de juego.
      * 
      * <p>
-     * Carga los datos del jugador y enemigos, construye el mapa, genera posiciones iniciales,
-     * y asigna los eventos de teclado para mover al jugador. También organiza los personajes por velocidad
+     * Carga los datos del jugador y enemigos, construye el mapa, genera posiciones
+     * iniciales,
+     * y asigna los eventos de teclado para mover al jugador. También organiza los
+     * personajes por velocidad
      * para ejecutar el sistema de turnos.
      * </p>
      */
@@ -149,7 +153,7 @@ public class JuegoController implements Observer {
         enemigos = DataReader.leerJsonEnemigos(rutaBase + "/Enemigos/enemigo1.json");
         Proveedor.getInstance().setEnemigos(enemigos);
 
-        // Obtiene la lista de personajes 
+        // Obtiene la lista de personajes
         personajes = Proveedor.getInstance().getListaDePersonajesIncluyendoJugador();
 
         cargarStatsEnemigos(enemigos); // Inicializa la UI de enemigos
@@ -183,7 +187,10 @@ public class JuegoController implements Observer {
                         break;
                 }
                 actualizarStatsTodos(); // Actualiza toda la interfaz tras el movimiento y pasa de turno
-                siguienteTurno(); 
+                siguienteTurno();
+                if (mapa.estaEnLaTrampa()) {
+                    jugador.setVida(jugador.getVida() - 1);
+                }
             }
             stackPaneJuego.requestFocus(); // Mantiene el foco en el StackPane tras pulsar tecla
         });
@@ -199,7 +206,6 @@ public class JuegoController implements Observer {
         actualizarLabelTurno(); // Muestra mensaje de "¡Tu turno!" si es necesario
     }
 
-
     /**
      * Lógica que se ejecuta cuando el jugador (modelo) notifica un cambio.
      * Actualiza los valores mostrados en la interfaz de usuario.
@@ -209,15 +215,16 @@ public class JuegoController implements Observer {
         actualizarStats(); // Actualiza la UI cuando hay un cambio en el modelo (Jugador)
     }
 
-
     /**
      * Avanza al siguiente personaje en el orden de turnos.
      * 
      * - Si es el turno del jugador, se espera entrada por teclado.
-     * - Si es el turno de un enemigo, se lanza un movimiento automático tras un breve delay.
+     * - Si es el turno de un enemigo, se lanza un movimiento automático tras un
+     * breve delay.
      */
     private void siguienteTurno() {
-        if (juegoTerminado) return; // Evita seguir si la partida terminó
+        if (juegoTerminado)
+            return; // Evita seguir si la partida terminó
 
         // Elimina personajes muertos de la lista de turnos
         personajesPorTurno.removeIf(personaje -> personaje.getVida() <= 0);
@@ -241,13 +248,13 @@ public class JuegoController implements Observer {
             pause.play(); // Inicia la pausa
         }
     }
-    
-    
-     /**
+
+    /**
      * Actualiza la interfaz con los valores actuales del jugador y los enemigos.
      * 
      * También verifica si se ha alcanzado una condición de fin de partida,
-     * como la derrota del jugador o la victoria por eliminación o llegada a la escalera.
+     * como la derrota del jugador o la victoria por eliminación o llegada a la
+     * escalera.
      */
     private void actualizarStatsTodos() {
         if (juegoTerminado)
@@ -272,7 +279,6 @@ public class JuegoController implements Observer {
         }
     }
 
-
     /**
      * Muestra u oculta el mensaje de "¡Tu turno!" dependiendo del turno actual.
      */
@@ -287,7 +293,6 @@ public class JuegoController implements Observer {
         }
     }
 
-
     /**
      * Carga una imagen desde la ruta proporcionada.
      *
@@ -297,7 +302,6 @@ public class JuegoController implements Observer {
     private Image cargarImagenJugador(String rutaImagen) {
         return new Image(getClass().getResource(rutaImagen).toExternalForm());
     }
-
 
     /**
      * Actualiza los valores mostrados en pantalla asociados al jugador:
@@ -319,7 +323,8 @@ public class JuegoController implements Observer {
     }
 
     /*
-     * Lo ideal para las stats de enemigos es establecer un grid en la escena y asignar los valores a las
+     * Lo ideal para las stats de enemigos es establecer un grid en la escena y
+     * asignar los valores a las
      * celdas, pero esto es un arreglo más fino, para
      * no determinar una a una cada View y cada Label.
      */
@@ -353,32 +358,31 @@ public class JuegoController implements Observer {
         }
     }
 
-
     /**
      * Ordena los personajes por velocidad descendente y actualiza
-     * las miniaturas de la sección lateral de la vista, indicando quién es más rápido.
+     * las miniaturas de la sección lateral de la vista, indicando quién es más
+     * rápido.
      *
      * @param personajes lista completa de personajes, incluyendo al jugador.
      */
     private void mostrarpersonajesPorVelocidad(List<Personaje> personajes) {
-    personajes.sort(Comparator.comparingInt(Personaje::getVelocidad).reversed());
+        personajes.sort(Comparator.comparingInt(Personaje::getVelocidad).reversed());
 
-    List<ImageView> imagenesVelocidad = List.of(imagenMasVelocidad, imagenVelocidadMedia, imagenMasLento, imagenMasMasLento);
-    List<Label> etiquetasVelocidad = List.of(masVelocidad, velocidadMedia, masLento, masMasLento);
+        List<ImageView> imagenesVelocidad = List.of(imagenMasVelocidad, imagenVelocidadMedia, imagenMasLento,
+                imagenMasMasLento);
+        List<Label> etiquetasVelocidad = List.of(masVelocidad, velocidadMedia, masLento, masMasLento);
 
-    for (int i = 0; i < imagenesVelocidad.size(); i++) {
-        if (i < personajes.size() && personajes.get(i).getRutaImagen() != null) {
-            imagenesVelocidad.get(i).setImage(cargarImagenJugador(personajes.get(i).getRutaImagen()));
-            etiquetasVelocidad.get(i).setText(String.valueOf(personajes.get(i).getVelocidad()));
-            imagenesVelocidad.get(i).setOpacity(1.0); // Por si acaso se oculta visualmente
-        } else {
-            imagenesVelocidad.get(i).setImage(null);
-            etiquetasVelocidad.get(i).setText("");
+        for (int i = 0; i < imagenesVelocidad.size(); i++) {
+            if (i < personajes.size() && personajes.get(i).getRutaImagen() != null) {
+                imagenesVelocidad.get(i).setImage(cargarImagenJugador(personajes.get(i).getRutaImagen()));
+                etiquetasVelocidad.get(i).setText(String.valueOf(personajes.get(i).getVelocidad()));
+                imagenesVelocidad.get(i).setOpacity(1.0); // Por si acaso se oculta visualmente
+            } else {
+                imagenesVelocidad.get(i).setImage(null);
+                etiquetasVelocidad.get(i).setText("");
+            }
         }
     }
-}
-
-
 
     /**
      * Genera una instancia Mapa en la que establece la correspondencia gráfica
@@ -408,7 +412,8 @@ public class JuegoController implements Observer {
      * 
      * <p>
      * El objetivo es que las propiedades de los nodos ya estén establecidas antes
-     * de extraerlas y operar sobre ellos.<br><br>
+     * de extraerlas y operar sobre ellos.<br>
+     * <br>
      * 
      * También añade un listener para que el tablero se regenere dinámicamente
      * si el ancho del contenedor cambia (responsive design).
